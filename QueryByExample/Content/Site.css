@@ -1,0 +1,62 @@
+﻿.container-draggable {
+    height: 700px;
+    border: 1px solid #999;
+    position: relative;
+    overflow: scroll
+}
+
+.draggable {
+    width: 260px;
+    border: 1px solid #e3e6f0;
+    position: absolute;
+    z-index: 12;
+}
+
+.table-sql thead,
+.table-sql tfoot {
+    background-color: #3f87a6;
+    color: #fff;
+}
+
+.table-sql tbody {
+    background-color: #e4f0f5;
+}
+
+.table-sql caption {
+    padding: 10px;
+    caption-side: bottom;
+}
+
+table.table-sql {
+    border-collapse: collapse;
+    border: 2px solid rgb(200, 200, 200);
+    letter-spacing: 1px;
+    font-family: sans-serif;
+    font-size: .8rem;
+}
+
+.table-sql td,
+.table-sql th {
+    border: 1px solid rgb(190, 190, 190);
+    padding: 5px 10px;
+}
+
+.table-sql td {
+    text-align: center;
+}
+
+
+#canvas {
+    position: absolute;
+    background-color: #fff;
+    color: #000;
+    border: 1px solid #999;
+    z-index: 9;
+}
+
+.no-border{
+    border: 0px!important;
+}
+.no-border-left {
+    border-left: 0px!important;
+}
