@@ -1,4 +1,6 @@
-﻿var colors = ["black", "silver", "gray", "white", "maroon", "red", "purple", "fuchsia", "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua", "orange", "antiquewhite", "aquamarine", "beige", "bisque", "blanchedalmond", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse", "chocolate", "coral", "cornflowerblue", "cornsilk", "crimson", "cyan", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon", "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise", "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick", "forestgreen",  "gold", "goldenrod", "greenyellow", "grey", "hotpink", "indianred", "indigo", "khaki", "lawngreen", "lemonchiffon",  "limegreen", "linen", "magenta", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple", "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise", "mediumvioletred", "midnightblue", "mistyrose", "moccasin", "navajowhite", "olivedrab", "orangered", "orchid", "palegoldenrod", "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru", "pink", "plum", "powderblue", "rosybrown", "royalblue", "saddlebrown", "salmon", "sandybrown", "seagreen", "sienna", "skyblue", "slateblue", "slategray", "slategrey", "springgreen", "steelblue", "tan", "thistle", "tomato", "turquoise", "violet", "wheat", "yellowgreen", "rebeccapurple"];
+﻿var colors = ["black", "silver", "gray", "white", "maroon", "red", "purple", "fuchsia", "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua",  "antiquewhite", "aquamarine", "beige", "bisque", "blanchedalmond", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse", "chocolate", "coral", "cornflowerblue", "crimson", "cyan", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon", "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise", "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick", "forestgreen",  "gold", "goldenrod", "greenyellow", "grey", "hotpink", "indianred", "indigo", "khaki", "lawngreen", "lemonchiffon",  "limegreen", "linen", "magenta", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple", "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise", "mediumvioletred", "midnightblue", "mistyrose", "moccasin", "navajowhite", "olivedrab", "orangered", "orchid", "palegoldenrod", "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru", "pink", "plum", "powderblue", "rosybrown", "royalblue", "saddlebrown", "salmon", "sandybrown", "seagreen", "sienna", "skyblue", "slateblue", "slategray", "slategrey", "steelblue", "tan", "thistle", "tomato", "turquoise", "violet", "wheat", "yellowgreen", "rebeccapurple"];
+
+// Hàm lấy tọa độ của elm
 function getOffset(elm, parent) {
     var offset_elm = elm.offset();
 
@@ -20,6 +22,8 @@ function getOffset(elm, parent) {
     
     return result;
 }
+
+//Hàm vẽ canvas
 function draw() {
     const canvas = document.querySelector('#canvas');
 
@@ -106,6 +110,7 @@ function draw() {
 
 }
 
+// Hàm xóa canvas
 function clear() {
     const canvas = document.querySelector('#canvas');
 
@@ -118,12 +123,26 @@ function clear() {
 
 }
 
-function setGenTable() {
-    var html = '<option value=""></option>';
-    html += QBE.Tables.map(function (c) { return '<option value="' + c.object_id + "$$" + c.name + '">' + c.name + '</option>'; }).join('');
+// Thêm bảng mới vào danh sách Table
+function addOptionGenTable(table) {
+    var value = table.object_id + "$$" + table.name;
+    var html = '<option value="' + value + '">' + table.name + '</option>';
+    $(".gen_Table").append(html);
+}
 
-    $(".gen_Table").html(html);
-    $(".gen_Table").trigger("change");
+// Xóa bảng khỏi danh sách Table
+function removeOptionGenTable(table) {
+    var value = table.object_id + "$$" + table.name;
+
+    var item = $(".gen_Table option[value='" + value + "']");
+    var item_selected = $(".gen_Table option[value='" + value + "']:selected");
+    var isChange = item_selected.length > 0;
+    var parent = item_selected.parent();
+    item.remove();
+
+    if (isChange) {
+        parent.trigger("change");
+    }
 }
 
 window.QBE = {};
@@ -132,6 +151,7 @@ QBE.Tables = [];
 
 
 $(function () {
+    // Lấy danh sách các khóa ngoại và sau đó vẽ lại nó bằng canvas
     function getForeignKey(object_id) {
         $.ajax({
             url: 'Default.aspx/getForeignKey',
@@ -173,12 +193,13 @@ $(function () {
 
     var draggable = $(".draggable").draggable(options);
 
-     
+     // Sự kiện click vào tên table => hiện table ở bảng relationship
     $('body').on('click', '.btnGetColumn', function () {
         var object_id = $(this).data("id");
         var name = $(this).data("name");
 
         var table = $("table[id=table_" + object_id + "]");
+        // nếu bảng đã tồn tại trên relationship thì xóa nó khỏi 
         if (table.length > 0) {
             $("a[id=a_" + object_id + "]").parents().removeClass("active");
 
@@ -188,10 +209,11 @@ $(function () {
             table.remove();
             clear();
             draw();
-            setGenTable();
+            removeOptionGenTable({ object_id, name });
             return;
         }
 
+        // Thực hiện requset lên server lấy danh sách các cột của 1 bảng nào đó theo object_id
         $.ajax({
             url: 'Default.aspx/getColumns',
             method: 'post',
@@ -200,7 +222,8 @@ $(function () {
             dataType: "json",
             success: function (resp) {
                 draggable.draggable("destroy");
-                
+
+                // vẽ lại nó trên bảng relationship
                 var html = "<table class=\"draggable shadow table-sql\" data-id=\""+object_id+"\" id=\"table_" + object_id + "\">" +
                     "<thead>" +
                     "<tr>" +
@@ -209,18 +232,19 @@ $(function () {
                     "</thead>" +
                     "<tbody>";
                 html += "<tr data-column=\"" + name + ".*\" data-id=\"*\"><th scope=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*</th></tr>";
-                var data = JSON.parse(resp.d);
+                var dataColumn = JSON.parse(resp.d);
 
-                QBE.Tables.push({
+                var dataTable = {
                     name: name,
                     object_id: object_id,
-                    columns: data
-                });
+                    columns: dataColumn
+                };
+                QBE.Tables.push(dataTable);
 
-                for (let i = 0; i < data.length; i++) {
-                    var type = data[i].CHARACTER_MAXIMUM_LENGTH != null ? "(" + data[i].CHARACTER_MAXIMUM_LENGTH + ")" : "";
-                    var pk = data[i].is_primary_key ? "<img src=\"Content/images/b_primary.png\"/>&nbsp;" : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                    html += "<tr data-column=\"" + name + "." + data[i].name +"\" data-id=\"" +data[i].name+"\"><th scope=\"row\">" + pk + data[i].name + ": " + data[i].DATA_TYPE + type +"</th></tr>";
+                for (let i = 0; i < dataColumn.length; i++) {
+                    var type = dataColumn[i].CHARACTER_MAXIMUM_LENGTH != null ? "(" + dataColumn[i].CHARACTER_MAXIMUM_LENGTH + ")" : "";
+                    var pk = dataColumn[i].is_primary_key ? "<img src=\"Content/images/b_primary.png\"/>&nbsp;" : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                    html += "<tr data-column=\"" + name + "." + dataColumn[i].name + "\" data-id=\"" + dataColumn[i].name + "\"><th scope=\"row\">" + pk + dataColumn[i].name + ": " + dataColumn[i].DATA_TYPE + type +"</th></tr>";
                 }
 
                 html += "</tbody></table>";
@@ -229,7 +253,7 @@ $(function () {
                 $(".draggable").draggable(options);
                 $("a[id=a_" + object_id + "]").parents().addClass("active");
                 getForeignKey(object_id);
-                setGenTable();
+                addOptionGenTable(dataTable);
             },
             error: function (err) {
                 console.log(err);
@@ -237,6 +261,7 @@ $(function () {
         });
     });
 
+    // Sự kiện nếu chọn cột table => lấy column hiện thị ra bảng chọn field
     $('body').on('change', '.gen_Table', function () {
         var value = this.value.split("$$");
         var object_id = value.length > 0 ? value[0] : '';
@@ -261,30 +286,60 @@ $(function () {
         elm_check_show.prop("checked", true);
     });
 
+    // Sự kiện click nút tạo câu lệnh query SQL
     $('body').on('click', '#genSQL', function () {
 
-        var data = $("#genForm").serializeArray();
-        var result = {
-            object_ids: []
-        };
-        for (let i = 0; i < data.length; i++) {
-            if (!result[data[i].name]) {
-                result[data[i].name] = [];
-            }
-            var value = data[i].value;
-            var object_id = "";
-            if (data[i].value.includes("$$")) {
-                var array = data[i].value.split("$$");
-                object_id = array[0];
-                value = array[1];
-            }
-            if (data[i].name == "gen_Table") {
-                result["object_ids"].push(object_id);
-            }
-            result[data[i].name].push(value);
-        }
-        if (!result.gen_Show) result.gen_Show = [];
+        // Tạo lại data => json
+            var data = $("#genForm").serializeArray();
+            var result = {
+                object_ids: []
+            };
+            for (let i = 0; i < data.length; i++) {
+                var name = data[i].name;
+                var value = data[i].value;
 
+                if (!result[name]) {
+                    result[name] = [];
+                }
+
+            
+            
+                var object_id = "";
+                if (data[i].value.includes("$$")) {
+                    var array = data[i].value.split("$$");
+                    object_id = array[0];
+                    value = array[1];
+                }
+                if (name == "gen_Table") {
+                    result["object_ids"].push(object_id);
+                }
+
+                result[name].push(value);
+            
+            
+            }
+            if (!result.gen_Show) result.gen_Show = [];
+            if (!result.gen_Total) result.gen_Total = [];
+
+            // xoa so thu tu, neu la dieu kien gen_Or$$0, gen_Or$$1,....
+            var keys = Object.keys(result);
+            for (let i = 0; i < keys.length; i++) {
+                const key = keys[i];
+                if (key.includes("$$")) {
+                    var name_info = key.split("$$");
+                    var new_key = name_info[0];
+
+                    if (!result[new_key]) {
+                        result[new_key] = [];
+                    }
+
+                    result[new_key].push(result[key]);
+                    delete result[key];
+                }
+            }
+
+        result.TableList = QBE.Tables.map(item => item.name);
+        // thực hiện request lên server để gen câu lệnh sql
         $.ajax({
             url: 'Default.aspx/genSQL',
             method: 'post',
@@ -297,6 +352,7 @@ $(function () {
                         Swal.fire("Lỗi!", resp.d.replace("ERROR|", ""), 'error');
                     } else {
                         $("#querySQL").val(resp.d);
+                        $("#sql-panel-tab").tab("show");
                     }
                 }
                 else {
@@ -309,6 +365,7 @@ $(function () {
         });
     });
 
+    // sự kiện click nút tạo report
     $('body').on('click', '#genReport', function () {
 
         var data = $("#reportForm").serializeArray();
@@ -338,5 +395,29 @@ $(function () {
                 console.log(err);
             }
         });
+    });
+
+
+    // sự kiện click nút tạo hàm thống kê
+    $('body').on('click', '#sumSQL', function () {
+        if ($("#tr_Total").hasClass("d-none")) {
+            $("#tr_Total").removeClass("d-none");
+            $(".gen_Total").prop("disabled", false);
+        } else {
+            $("#tr_Total").addClass("d-none");
+            $(".gen_Total").prop("disabled", true);
+        }
+        
+    });
+
+    // sự kiện click nút reset tất cả
+    $('body').on('click', '#resetAllSQL', function () {
+        $("#genForm").trigger("reset");
+        $("#reportForm").trigger("reset");
+
+        $(".item_table.active").each(function (index) {
+            $(this).find("a").click();
+        });
+
     });
 });

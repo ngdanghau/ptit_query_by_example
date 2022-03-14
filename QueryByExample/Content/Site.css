@@ -1,6 +1,6 @@
 ﻿.container-draggable {
     height: 700px;
-    border: 1px solid #999;
+    border: 1px solid #e3e6f0;
     position: relative;
     overflow: scroll
 }
@@ -50,7 +50,7 @@ table.table-sql {
     position: absolute;
     background-color: #fff;
     color: #000;
-    border: 1px solid #999;
+    border: 1px solid #e3e6f0;
     z-index: 9;
 }
 
