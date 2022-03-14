@@ -151,31 +151,36 @@ QBE.Tables = [];
 
 
 $(function () {
-    // Lấy danh sách các khóa ngoại và sau đó vẽ lại nó bằng canvas
-    function getForeignKey(object_id) {
+    function ajaxRequest(url, data, callback) {
         $.ajax({
-            url: 'Default.aspx/getForeignKey',
+            url: url,
             method: 'post',
             contentType: "application/json",
-            data: '{object_id:' + object_id + '}',
+            data: JSON.stringify(data),
             dataType: "json",
             success: function (resp) {
-                var data = JSON.parse(resp.d);
-                if (data.length > 0) {
-                    data.map(item => {
-                        item.color = colors[Math.floor(Math.random() * colors.length)];
-                        return item;
-                    });
-                    QBE.ForeignKeys.push({
-                        object_id: object_id,
-                        data: data
-                    });
-                }
-                draw();
+                callback(resp);
             },
             error: function (err) {
                 console.log(err);
             }
+        });
+    }
+    // Lấy danh sách các khóa ngoại và sau đó vẽ lại nó bằng canvas
+    function getForeignKey(object_id) {
+        ajaxRequest('Default.aspx/getForeignKey', { object_id: object_id } , function (resp) {
+            var data = JSON.parse(resp.d);
+            if (data.length > 0) {
+                data.map(item => {
+                    item.color = colors[Math.floor(Math.random() * colors.length)];
+                    return item;
+                });
+                QBE.ForeignKeys.push({
+                    object_id: object_id,
+                    data: data
+                });
+            }
+            draw();
         });
     }
 
@@ -214,50 +219,40 @@ $(function () {
         }
 
         // Thực hiện requset lên server lấy danh sách các cột của 1 bảng nào đó theo object_id
-        $.ajax({
-            url: 'Default.aspx/getColumns',
-            method: 'post',
-            contentType: "application/json",
-            data: '{object_id:' + object_id + '}',
-            dataType: "json",
-            success: function (resp) {
-                draggable.draggable("destroy");
+        ajaxRequest('Default.aspx/getColumns', { object_id: object_id }, function (resp) {
+            draggable.draggable("destroy");
 
-                // vẽ lại nó trên bảng relationship
-                var html = "<table class=\"draggable shadow table-sql\" data-id=\""+object_id+"\" id=\"table_" + object_id + "\">" +
-                    "<thead>" +
-                    "<tr>" +
-                    "<th scope=\"col\">" + name + "</th>" +
-                    "</tr>" +
-                    "</thead>" +
-                    "<tbody>";
-                html += "<tr data-column=\"" + name + ".*\" data-id=\"*\"><th scope=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*</th></tr>";
-                var dataColumn = JSON.parse(resp.d);
+            // vẽ lại nó trên bảng relationship
+            var html = "<table class=\"draggable shadow table-sql\" data-id=\"" + object_id + "\" id=\"table_" + object_id + "\">" +
+                "<thead>" +
+                "<tr>" +
+                "<th scope=\"col\">" + name + "</th>" +
+                "</tr>" +
+                "</thead>" +
+                "<tbody>";
+            html += "<tr data-column=\"" + name + ".*\" data-id=\"*\"><th scope=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*</th></tr>";
+            var dataColumn = JSON.parse(resp.d);
 
-                var dataTable = {
-                    name: name,
-                    object_id: object_id,
-                    columns: dataColumn
-                };
-                QBE.Tables.push(dataTable);
+            var dataTable = {
+                name: name,
+                object_id: object_id,
+                columns: dataColumn
+            };
+            QBE.Tables.push(dataTable);
 
-                for (let i = 0; i < dataColumn.length; i++) {
-                    var type = dataColumn[i].CHARACTER_MAXIMUM_LENGTH != null ? "(" + dataColumn[i].CHARACTER_MAXIMUM_LENGTH + ")" : "";
-                    var pk = dataColumn[i].is_primary_key ? "<img src=\"Content/images/b_primary.png\"/>&nbsp;" : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                    html += "<tr data-column=\"" + name + "." + dataColumn[i].name + "\" data-id=\"" + dataColumn[i].name + "\"><th scope=\"row\">" + pk + dataColumn[i].name + ": " + dataColumn[i].DATA_TYPE + type +"</th></tr>";
-                }
-
-                html += "</tbody></table>";
-
-                $("#listTable").append(html);
-                $(".draggable").draggable(options);
-                $("a[id=a_" + object_id + "]").parents().addClass("active");
-                getForeignKey(object_id);
-                addOptionGenTable(dataTable);
-            },
-            error: function (err) {
-                console.log(err);
+            for (let i = 0; i < dataColumn.length; i++) {
+                var type = dataColumn[i].CHARACTER_MAXIMUM_LENGTH != null ? "(" + dataColumn[i].CHARACTER_MAXIMUM_LENGTH + ")" : "";
+                var pk = dataColumn[i].is_primary_key ? "<img src=\"Content/images/b_primary.png\"/>&nbsp;" : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                html += "<tr data-column=\"" + name + "." + dataColumn[i].name + "\" data-id=\"" + dataColumn[i].name + "\"><th scope=\"row\">" + pk + dataColumn[i].name + ": " + dataColumn[i].DATA_TYPE + type + "</th></tr>";
             }
+
+            html += "</tbody></table>";
+
+            $("#listTable").append(html);
+            $(".draggable").draggable(options);
+            $("a[id=a_" + object_id + "]").parents().addClass("active");
+            getForeignKey(object_id);
+            addOptionGenTable(dataTable);
         });
     });
 
@@ -340,27 +335,18 @@ $(function () {
 
         result.TableList = QBE.Tables.map(item => item.name);
         // thực hiện request lên server để gen câu lệnh sql
-        $.ajax({
-            url: 'Default.aspx/genSQL',
-            method: 'post',
-            contentType: "application/json",
-            data: JSON.stringify(result),
-            dataType: "json",
-            success: function (resp) {
-                if (resp.d) {
-                    if (resp.d.includes("ERROR|")) {
-                        Swal.fire("Lỗi!", resp.d.replace("ERROR|", ""), 'error');
-                    } else {
-                        $("#querySQL").val(resp.d);
-                        $("#sql-panel-tab").tab("show");
-                    }
+
+        ajaxRequest('Default.aspx/genSQL', result, function (resp) {
+            if (resp.d) {
+                if (resp.d.includes("ERROR|")) {
+                    Swal.fire("Lỗi!", resp.d.replace("ERROR|", ""), 'error');
+                } else {
+                    $("#querySQL").val(resp.d);
+                    $("#sql-panel-tab").tab("show");
                 }
-                else {
-                    Swal.fire("Thất bại!", "Lỗi hệ thống! Hãy thử lại!", 'error');
-                }
-            },
-            error: function (err) {
-                console.log(err);
+            }
+            else {
+                Swal.fire("Thất bại!", "Lỗi hệ thống! Hãy thử lại!", 'error');
             }
         });
     });
@@ -373,26 +359,17 @@ $(function () {
         for (let i = 0; i < data.length; i++) {
             result[data[i].name] = data[i].value;
         }
-        $.ajax({
-            url: 'Default.aspx/genReport',
-            method: 'post',
-            contentType: "application/json",
-            data: JSON.stringify(result),
-            dataType: "json",
-            success: function (resp) {
-                if (resp.d) {
-                    if (resp.d.includes("ERROR|")) {
-                        Swal.fire("Lỗi!", resp.d.replace("ERROR|", ""), 'error');
-                    } else {
-                        window.open('/Viewer.aspx', '_blank');
-                    }
+
+        ajaxRequest('Default.aspx/genReport', result, function (resp) {
+            if (resp.d) {
+                if (resp.d.includes("ERROR|")) {
+                    Swal.fire("Lỗi!", resp.d.replace("ERROR|", ""), 'error');
+                } else {
+                    window.open('/Viewer.aspx', '_blank');
                 }
-                else {
-                    Swal.fire("Thất bại!", "Lỗi hệ thống! Hãy thử lại!", 'error');
-                }
-            },
-            error: function (err) {
-                console.log(err);
+            }
+            else {
+                Swal.fire("Thất bại!", "Lỗi hệ thống! Hãy thử lại!", 'error');
             }
         });
     });
