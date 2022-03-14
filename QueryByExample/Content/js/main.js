@@ -1,4 +1,11 @@
 ﻿var colors = ["black", "silver", "gray", "white", "maroon", "red", "purple", "fuchsia", "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua",  "antiquewhite", "aquamarine", "beige", "bisque", "blanchedalmond", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse", "chocolate", "coral", "cornflowerblue", "crimson", "cyan", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon", "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise", "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick", "forestgreen",  "gold", "goldenrod", "greenyellow", "grey", "hotpink", "indianred", "indigo", "khaki", "lawngreen", "lemonchiffon",  "limegreen", "linen", "magenta", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple", "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise", "mediumvioletred", "midnightblue", "mistyrose", "moccasin", "navajowhite", "olivedrab", "orangered", "orchid", "palegoldenrod", "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru", "pink", "plum", "powderblue", "rosybrown", "royalblue", "saddlebrown", "salmon", "sandybrown", "seagreen", "sienna", "skyblue", "slateblue", "slategray", "slategrey", "steelblue", "tan", "thistle", "tomato", "turquoise", "violet", "wheat", "yellowgreen", "rebeccapurple"];
+var operators = [">=", "<=", ">", "<", "="];
+
+function isNumeric(str) {
+    if (typeof str != "string") return false // we only process strings!  
+    return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+        !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+}
 
 // Hàm lấy tọa độ của elm
 function getOffset(elm, parent) {
@@ -198,6 +205,37 @@ $(function () {
 
     var draggable = $(".draggable").draggable(options);
 
+    function removeTableFromRelationShip(data, elm) {
+        $("a[id=a_" + data.object_id + "]").parents().removeClass("active");
+
+        QBE.Tables = QBE.Tables.filter(table => table.object_id != data.object_id);
+        QBE.ForeignKeys = QBE.ForeignKeys.filter(table => table.object_id != data.object_id);
+
+        elm.remove();
+        clear();
+        draw();
+        removeOptionGenTable(data);
+    }
+
+    $.contextMenu({
+        selector: '.context-menu',
+        callback: function (key, options) {
+            var item = options.$trigger,
+                object_id = item.attr("data-id"),
+                name = item.attr("data-name");
+
+            var table = $("table[id=table_" + object_id + "]");
+            // nếu bảng đã tồn tại trên relationship thì xóa nó khỏi 
+            if (table.length > 0) {
+                removeTableFromRelationShip({ object_id, name }, table)
+                return;
+            }
+        },
+        items: {
+            "delete": { name: "Delete", icon: "delete" },
+        }
+    });  
+
      // Sự kiện click vào tên table => hiện table ở bảng relationship
     $('body').on('click', '.btnGetColumn', function () {
         var object_id = $(this).data("id");
@@ -206,15 +244,7 @@ $(function () {
         var table = $("table[id=table_" + object_id + "]");
         // nếu bảng đã tồn tại trên relationship thì xóa nó khỏi 
         if (table.length > 0) {
-            $("a[id=a_" + object_id + "]").parents().removeClass("active");
-
-            QBE.Tables = QBE.Tables.filter(table => table.object_id != object_id);
-            QBE.ForeignKeys = QBE.ForeignKeys.filter(table => table.object_id != object_id);
-
-            table.remove();
-            clear();
-            draw();
-            removeOptionGenTable({ object_id, name });
+            removeTableFromRelationShip({ object_id, name }, table);
             return;
         }
 
@@ -223,7 +253,7 @@ $(function () {
             draggable.draggable("destroy");
 
             // vẽ lại nó trên bảng relationship
-            var html = "<table class=\"draggable shadow table-sql\" data-id=\"" + object_id + "\" id=\"table_" + object_id + "\">" +
+            var html = "<table class=\"draggable shadow table-sql context-menu\" data-name=\""+name+"\" data-id=\"" + object_id + "\" id=\"table_" + object_id + "\">" +
                 "<thead>" +
                 "<tr>" +
                 "<th scope=\"col\">" + name + "</th>" +
@@ -258,11 +288,13 @@ $(function () {
 
     // Sự kiện nếu chọn cột table => lấy column hiện thị ra bảng chọn field
     $('body').on('change', '.gen_Table', function () {
-        var value = this.value.split("$$");
+        var $this = $(this);
+        var value = $this.val().split("$$");
         var object_id = value.length > 0 ? value[0] : '';
-        var id = $(this).attr("data-id");
-        var elm = $("#gen_Field_" + id);
-        var elm_check_show = $("#gen_Show_" + id);
+        var idx = $('#tr_Table td').index($this.parent());
+
+        var elm = $("#tr_Field td:eq(" + idx + ")").find("select[name=gen_Field]");
+        var elm_check_show = $("#tr_Show td:eq(" + idx + ")").find("input[name=gen_Show]");;
         var html = '';
 
         if (!object_id || object_id == "") {
@@ -316,26 +348,16 @@ $(function () {
             if (!result.gen_Show) result.gen_Show = [];
             if (!result.gen_Total) result.gen_Total = [];
 
-            // xoa so thu tu, neu la dieu kien gen_Or$$0, gen_Or$$1,....
-            var keys = Object.keys(result);
-            for (let i = 0; i < keys.length; i++) {
-                const key = keys[i];
-                if (key.includes("$$")) {
-                    var name_info = key.split("$$");
-                    var new_key = name_info[0];
-
-                    if (!result[new_key]) {
-                        result[new_key] = [];
-                    }
-
-                    result[new_key].push(result[key]);
-                    delete result[key];
-                }
-            }
-
+        var noOfColumn = document.getElementById('dataTable').rows[0].cells.length - 1;
+        var genOr = [];
+        for (let i = 0; i < result.gen_Or.length; i += noOfColumn) {
+            genOr.push(result.gen_Or.slice(i, i + noOfColumn));
+        }
+        result.gen_Or = genOr;
         result.TableList = QBE.Tables.map(item => item.name);
         // thực hiện request lên server để gen câu lệnh sql
-
+        
+        $("#genForm").find(".card").addClass("loading");
         ajaxRequest('Default.aspx/genSQL', result, function (resp) {
             if (resp.d) {
                 if (resp.d.includes("ERROR|")) {
@@ -348,12 +370,14 @@ $(function () {
             else {
                 Swal.fire("Thất bại!", "Lỗi hệ thống! Hãy thử lại!", 'error');
             }
+            $("#genForm").find(".card").removeClass("loading");
         });
     });
 
     // sự kiện click nút tạo report
     $('body').on('click', '#genReport', function () {
 
+        $("#reportForm").find(".card").addClass("loading");
         var data = $("#reportForm").serializeArray();
         var result = {};
         for (let i = 0; i < data.length; i++) {
@@ -371,6 +395,7 @@ $(function () {
             else {
                 Swal.fire("Thất bại!", "Lỗi hệ thống! Hãy thử lại!", 'error');
             }
+            $("#reportForm").find(".card").removeClass("loading");
         });
     });
 
@@ -391,10 +416,59 @@ $(function () {
     $('body').on('click', '#resetAllSQL', function () {
         $("#genForm").trigger("reset");
         $("#reportForm").trigger("reset");
+        $(".gen_Field option").each(function (index) {
+            if ($(this).val() != "") {
+                $(this).remove();
+            }
+        });
 
         $(".item_table.active").each(function (index) {
             $(this).find("a").click();
         });
 
+    });
+
+
+    // sự kiện click nút thêm 1 hàng
+    $('body').on('click', '#addOneRow', function () {
+        var noOfColumn = document.getElementById('dataTable').rows[0].cells.length - 1;
+        var html = `<tr> <td class="no-border">&nbsp;</td>`;
+
+        for (let i = 0; i < noOfColumn; i++) {
+            html += '<td> <input class="form-control form-control-sm" name="gen_Or" value=""> </td>';
+        }
+
+        html += '</tr>';
+        $("#dataTable tbody").append(html);
+    });
+
+    // sự kiện click nút thêm 1 hàng
+    $('body').on('click', '#addOneColumn', function () {
+        $('#dataTable tr').each(function () {
+            $(this).append($(this).find('td:last').clone());
+        });
+
+        var elm_table = $('#tr_Table td:last').find("select[name=gen_Table]");
+        elm_table.val("");
+        elm_table.trigger("change");
+    });
+
+    $('body').on('click', '#removeOneRow', function () {
+        if ($('#dataTable tbody tr').length == 12) {
+            Swal.fire("Cảnh báo!", "Không xóa được nữa!", 'warning');
+            return;
+        }
+        $('#dataTable tbody tr:last').remove();
+    });
+    $('body').on('click', '#removeOneColumn', function () {
+        var noOfColumn = document.getElementById('dataTable').rows[0].cells.length - 1;
+        if (noOfColumn == 10) {
+            Swal.fire("Cảnh báo!", "Không xóa được nữa!", 'warning');
+            return;
+        }
+
+        $('#dataTable tr').each(function () {
+            $(this).find('td:last').remove();
+        });
     });
 });

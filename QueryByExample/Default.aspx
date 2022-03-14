@@ -42,7 +42,12 @@
                                                   <textarea class="form-control" id="querySQL" name="query" rows="7"></textarea>
                                                 </div>
                                                 <div class="mb-3">
-                                                  <button type="button" class="btn btn-sm btn-primary"  id="genReport">Tạo báo cáo</button>
+                                                  <button type="button" class="btn btn-primary btn-icon-split"  id="genReport">
+                                                      <span class="icon text-white-50">
+                                                            <i class="fas fa-flag"></i>
+                                                        </span>
+                                                        <span class="text">Tạo báo cáo</span>
+                                                  </button>
                                   
                                                 </div>
                                             </div>
@@ -62,10 +67,72 @@
                             <form method="get" id="genForm">
                                 <div class="card">
                                     <div class="card-body bg-white">
-                                         <button type="button" class="btn btn-sm btn-success mb-3 mr-3" id="genSQL">Tạo query SQL</button>
-                                         <button type="button" class="btn btn-sm btn-primary mb-3 mr-3" id="sumSQL">Thêm hàm thống kê SQL</button>
-                                         <button type="reset" class="btn btn-sm btn-warning mb-3 mr-3" id="resetSQL">Reset bảng chọn</button>
-                                         <button type="button" class="btn btn-sm btn-danger mb-3" id="resetAllSQL">Reset tất cả</button>
+                                         
+                                        <div class="row">
+                                            <div class="col col-lg-7">
+                                                <button type="button" class="btn btn-success mb-3 mr-3 btn-icon-split" id="genSQL">
+                                                     <span class="icon text-white-50">
+                                                        <i class="fas fa-table"></i>
+                                                    </span>
+                                                    <span class="text">Tạo query SQL</span>
+                                                 </button>
+                                                 <button type="button" class="btn btn-primary mb-3 mr-3 btn-icon-split" id="sumSQL">
+                                                     <span class="icon text-white-50">
+                                                        <i class="fas fa-sigma"></i>
+                                                    </span>
+                                                    <span class="text">Thêm hàm thống kê SQL</span>
+                                                 </button>
+                                                 <button type="reset" class="btn btn-warning mb-3 mr-3 btn-icon-split" id="resetSQL">
+                                                     <span class="icon text-white-50">
+                                                        <i class="fas fa-repeat-1"></i>
+                                                    </span>
+                                                    <span class="text">Reset bảng chọn</span>
+                                                 </button>
+                                                 <button type="button" class="btn btn-danger mb-3 mr-3 btn-icon-split" id="resetAllSQL">
+                                                     <span class="icon text-white-50">
+                                                        <i class="fas fa-repeat"></i>
+                                                    </span>
+                                                    <span class="text">Reset tất cả</span>
+                                                 </button>
+
+                                                <button type="button" class="btn btn-info mb-3 mr-3 btn-icon-split" id="addOneColumn">
+                                                     <span class="icon text-white-50">
+                                                        <i class="fas fa-table-columns"></i>
+                                                    </span>
+                                                    <span class="text">Thêm 1 cột</span>
+                                                 </button>
+                                      
+
+                                                <button type="button" class="btn btn-dark mb-3 mr-3 btn-icon-split" id="addOneRow">
+                                                     <span class="icon text-white-50">
+                                                        <i class="fas fa-table-rows"></i>
+                                                    </span>
+                                                    <span class="text">Thêm 1 hàng</span>
+                                                 </button>
+                                            </div>
+                                            <div class="col col-lg-5 text-right">
+                                                 <button type="button" class="btn btn-info mb-3 mr-3 btn-icon-split" id="removeOneColumn">
+                                                    <span class="icon text-white-50">
+                                                        <i class="fas fa-table-columns"></i>
+                                                    </span>
+                                                    <span class="text">Xóa cột cuối</span>
+                                                 </button>
+
+                                                 <button type="button" class="btn btn-dark mb-3 mr-3 btn-icon-split" id="removeOneRow">
+                                                     <span class="icon text-white-50">
+                                                        <i class="fas fa-table-rows"></i>
+                                                    </span>
+                                                    <span class="text">Xóa hàng cuối</span>
+                                                 </button>
+                                            </div>
+                                        </div>
+                                        
+                                       
+                                          
+                                        <div class="">
+                                           
+                                        </div>
+
                                          <table class="table table-bordered table-sm no-border table-responsive" id="dataTable" width="100%" cellspacing="0">
                                         <tbody>
                                             <% foreach (var col in listCol) { %>
@@ -75,19 +142,19 @@
                                                 <% for (int i = 0; i < 10; i++){ %>
                                                 <td style="width: 150px">
                                                     <% if (col == "Table" || col == "Field" ){ %>
-                                                    <select class="form-select form-select-sm gen_<%= col %>" data-id="<%= i %>" id="gen_<%= col %>_<%= i %>" name="gen_<%= col %>">
+                                                    <select class="form-select form-select-sm gen_<%= col %>"  name="gen_<%= col %>">
                                                       <option value=""></option>
                                                     </select>
                                                     <% } %>
 
                                                     <% else if (col == "Show"){ %>
                                                     <div class="form-check text-center">
-                                                      <input class="form-check-input" type="checkbox" value="<%= i %>" name="gen_<%= col %>" id="gen_<%= col %>_<%= i %>"/>
+                                                      <input class="form-check-input" type="checkbox" value="<%= i %>" name="gen_<%= col %>"/>
                                                     </div>
                                                     <% } %>
                                                 
                                                     <% else if (col == "Sort"){ %>
-                                                    <select class="form-select form-select-sm gen_<%= col %>" name="gen_<%= col %>" id="gen_<%= col %>">
+                                                    <select class="form-select form-select-sm gen_<%= col %>" name="gen_<%= col %>" >
                                                        <option value="">(not sorted)</option>
                                                        <option value="asc">Ascending</option>
                                                        <option value="desc">Descending</option>
@@ -95,7 +162,7 @@
                                                     <% } %>
 
                                                     <% else if (col == "Total"){ %>
-                                                    <select class="form-select form-select-sm gen_<%= col %>" name="gen_<%= col %>" id="gen_<%= col %>" disabled>
+                                                    <select class="form-select form-select-sm gen_<%= col %>" name="gen_<%= col %>" disabled>
                                                        <option value="group_by">Group By</option>
                                                        <option value="count">Count</option>
                                                        <option value="sum">Sum</option>
@@ -107,24 +174,24 @@
 
 
                                                     <% else if (col == "Or") { %>
-                                                        <input class="form-control form-control-sm" value="" name="gen_<%= col %>$$0" id="gen_<%= col %>$$0"/>
+                                                        <input class="form-control form-control-sm gen_<%= col %>" value="" name="gen_<%= col %>"/>
                                                     <% } %>
 
 
                                                     <% else { %>
-                                                        <input class="form-control form-control-sm" value="" name="gen_<%= col %>" id="gen_<%= col %>"/>
+                                                        <input class="form-control form-control-sm gen_<%= col %>" value="" name="gen_<%= col %>" id="gen_<%= col %>"/>
                                                     <% } %>
                                                 </td>
                                                  <% } %>
                                             </tr>
                                             <% } %>
 
-                                            <% for (int i = 0; i < 7; i++){ %>
+                                            <% for (int i = 0; i < 4; i++){ %>
                                             <tr>
                                                 <td class="no-border">&nbsp;</td>
                                                  <% for (int j = 0; j < 10; j++){ %>
                                                 <td>
-                                                    <input data-index="<%= i+1 %>" class="form-control form-control-sm" name="gen_Or$$<%= i+1 %>" value=""/>
+                                                    <input class="form-control form-control-sm" name="gen_Or" value=""/>
                                                 </td>
                                                 <% } %>
                                             </tr>

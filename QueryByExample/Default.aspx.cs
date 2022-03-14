@@ -71,56 +71,6 @@ public partial class _Default : System.Web.UI.Page {
         {
             throw new Exception("ERROR|Không thể áp dụng điều kiện " + text + " cho trường *");
         }
-
-        var condition_final = "";
-        if (!Utils.StartsWithAny(condition, new List<string> { "=", ">", ">=", "<", "<=" }, out condition_final))
-        {
-            throw new Exception("ERROR|Điều kiện " + text + " không đúng cú pháp");
-        }
-
-        if (string.IsNullOrEmpty(condition_final))
-        {
-            throw new Exception("ERROR|Điều kiện " + text + " không đúng cú pháp");
-        }
-
-        DataTable dt = getInfoColumn(Convert.ToInt32(object_id));
-        foreach (DataRow row in dt.Rows)
-        {
-
-            if (row["name"].ToString() == field)
-            {
-
-                var data_type = row["DATA_TYPE"].ToString();
-                // nẾU là kiểu số
-                if (NumericDataTypes.Contains(data_type))
-                {
-                    // kiểm tra có tồn tại dấu nháy của chuỗi ko
-                    if (condition_final.Contains("'"))
-                    {
-                        throw new Exception("ERROR|Điều kiện " + text + " của cột " + field + " không được là chuỗi!");
-                    }
-
-                    if (!Utils.IsNumeric(condition_final))
-                    {
-                        throw new Exception("ERROR|Điều kiện " + text + " của cột " + field + " phải là số!");
-                    }
-                }
-                // nếu là bit kiểm tra có phải là 0, 1, True, False ko
-                else if (data_type == "bit")
-                {
-                    if (condition_final != "'True'" && condition_final != "'False'" && condition_final != "0" && condition_final != "1")
-                    {
-                        throw new Exception("ERROR|Điều kiện " + text + " của cột " + field + " phải là 0 , 1, 'True', 'False'!");
-                    }
-                }
-
-                // nếu là kiểu string, kiểm tra có dấu ' ở đầu và cuối ko
-                else if (!condition_final.StartsWith("'") || !condition_final.EndsWith("'"))
-                {
-                    throw new Exception("ERROR|Điều kiện " + text + " không đúng so với kiểu dữ liệu của cột đang chọn!");
-                }
-            }
-        }
     }
 
     [System.Web.Services.WebMethod]
@@ -144,20 +94,29 @@ public partial class _Default : System.Web.UI.Page {
         var SortVarible = new List<string>() { "ASC", "DESC" };
 
         var TotalVarible = new List<string>() { "group_by", "sum", "count", "min", "max", "avg" };
-        
-        
+
+
         // kiểm tra có bảng tồn tại ko
+        var TempTable = gen_Table.Where(s => !string.IsNullOrWhiteSpace(s));
+
         if (
+            TempTable.Count() == 0 ||
             gen_Table.Count() == 0 ||
             object_ids.Count() == 0 ||
             gen_Field.Count() == 0 ||
             gen_Table.Count() != object_ids.Count()
-        ) return "ERROR|Vui lòng chọn bảng để gen sql";
+        ) return "ERROR|Chọn ít nhất 1 bảng";
 
 
         for (var i = 0; i < gen_Table.Count(); i++)
         {
-            var field = gen_Field[i].Trim();
+
+            var field = "";
+            if (Utils.inBounds(i, gen_Field))
+            {
+                field = gen_Field[i].Trim();
+            }
+             
             var table = gen_Table[i].Trim();
 
             if (string.IsNullOrEmpty(field) || string.IsNullOrEmpty(table)) continue;
