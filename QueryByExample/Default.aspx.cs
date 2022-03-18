@@ -85,15 +85,17 @@ public partial class _Default : System.Web.UI.Page {
     {
         var selectSQL = new List<string>();
         var orSQL = new List<string>();
-        var whereSQL = new List<string>();
+        var criteriaSQL = new List<string>();
         var joinSQL = new List<string>();
         var groupSQL = new List<string>();
         var sortSQL = new List<string>();
+        var havingCriteriaSQL = new List<string>();
+        var havingOrSQL = new List<string>();
 
         // khai báo giá trị mặc định
         var SortVarible = new List<string>() { "ASC", "DESC" };
 
-        var TotalVarible = new List<string>() { "group_by", "sum", "count", "min", "max", "avg" };
+        var TotalVarible = new List<string>() {  "group_by", "where","sum", "count", "min", "max", "avg" };
 
 
         // kiểm tra có bảng tồn tại ko
@@ -139,6 +141,7 @@ public partial class _Default : System.Web.UI.Page {
             }
 
             var isTotal = false;
+            var isShow = false;
             var total = "";
             // kiểm tra groupby
             if (Utils.inBounds(i, gen_Total))
@@ -162,7 +165,8 @@ public partial class _Default : System.Web.UI.Page {
             // Nếu check show thì hiện field ở select
             if (gen_Show.Contains(i.ToString()))
             {
-                if (isTotal && total != "group_by")
+                isShow = true;
+                if (isTotal && total != "group_by" && total != "where")
                 {
                     selectSQL.Add(total.ToUpper() + "(" + table_field + ")" + rename);
                 }
@@ -188,7 +192,26 @@ public partial class _Default : System.Web.UI.Page {
                         return ex.Message;
                     }
 
-                    whereSQL.Add(string.Format("({0})", table_field + criteria_value));
+                    if(isTotal )
+                    {
+                        if(total == "where")
+                        {
+                            criteriaSQL.Add(string.Format("({0})", table_field + criteria_value));
+                        }
+                        else if(total == "group_by")
+                        {
+                            havingCriteriaSQL.Add(string.Format("({0})", table_field + criteria_value));
+                        }
+                        else
+                        {
+                            havingCriteriaSQL.Add(string.Format("({0})", total.ToUpper() + "(" + table_field + ") " + criteria_value));
+                        }
+                    }
+                    else
+                    {
+                        criteriaSQL.Add(string.Format("({0})", table_field + criteria_value));
+                    }
+                    
                 }
             }
 
@@ -207,9 +230,16 @@ public partial class _Default : System.Web.UI.Page {
                         return "ERROR|Không thể sắp xếp cho trường *";
                     }
 
-                    if (isTotal && total != "group_by")
+                    if (isTotal)
                     {
-                        sortSQL.Add(string.Format("{0}({1}) {2}", total.ToUpper(), table_field, sort_value));
+                        if (total == "where")
+                        {
+                            sortSQL.Add(table_field + " " + sort_value);
+                        }
+                        else if(total != "group_by")
+                        {
+                            sortSQL.Add(string.Format("{0}({1}) {2}", total.ToUpper(), table_field, sort_value));
+                        } 
                     }
                     else
                     {
@@ -220,7 +250,7 @@ public partial class _Default : System.Web.UI.Page {
             }
 
 
-            if (isTotal && total == "group_by")
+            if (isShow && isTotal && (total == "group_by" || total == "where"))
             {
                 groupSQL.Add(table_field);
             }
@@ -233,11 +263,33 @@ public partial class _Default : System.Web.UI.Page {
         {
             // câu lệnh hoàn chỉnh sau khi lặp 1 dòng diều kiện or
             var or_condition = new List<string>();
+            var or_having_condition = new List<string>();
             for (var i = 0; i < gen_Table.Count(); i++)
             {
                 var field = gen_Field[i].Trim();
                 var table = gen_Table[i].Trim();
                 var table_field = table + "." + field;
+
+                var isTotal = false;
+                var total = "";
+                // kiểm tra groupby
+                if (Utils.inBounds(i, gen_Total))
+                {
+                    total = gen_Total[i].Trim();
+                    if (!string.IsNullOrEmpty(total))
+                    {
+                        if (!TotalVarible.Contains(total))
+                        {
+                            return "ERROR|Giá trị total không hợp lệ!";
+                        }
+
+                        if (field == "*")
+                        {
+                            return "ERROR|Giá trị Total không hợp lệ cho Field *!";
+                        }
+                        isTotal = true;
+                    }
+                }
 
                 if (Utils.inBounds(i, or_elms))
                 {
@@ -254,9 +306,35 @@ public partial class _Default : System.Web.UI.Page {
                             return ex.Message;
                         }
 
-                        or_condition.Add(
-                            string.Format("({0})", table_field + or_elm)
-                       );
+                        if (isTotal)
+                        {
+                            if (total == "group_by")
+                            {
+                                or_having_condition.Add(
+                                    string.Format("({0})", table_field + or_elm)
+                                );
+                            }
+                            else if (total == "where")
+                            {
+                                or_condition.Add(
+                                    string.Format("({0})", table_field + or_elm)
+                                );
+                            }
+                            else
+                            {
+                                or_having_condition.Add(
+                                    string.Format("({0})", total.ToUpper() + "(" + table_field + ") " + or_elm)
+                                );
+                            }
+
+                        }
+                        else
+                        {
+                            or_condition.Add(
+                                string.Format("({0})", table_field + or_elm)
+                            );
+                        }
+                        
                     }
                 }
             }
@@ -266,6 +344,13 @@ public partial class _Default : System.Web.UI.Page {
             {
                 orSQL.Add(
                     string.Format("({0})", string.Join(" AND ", or_condition))
+                );
+            } 
+            
+            if (or_having_condition.Count() > 0)
+            {
+                havingOrSQL.Add(
+                    string.Format("({0})", string.Join(" AND ", or_having_condition))
                 );
             }
         }
@@ -297,35 +382,37 @@ public partial class _Default : System.Web.UI.Page {
         }
 
 
-        string sql = string.Format("SELECT {0} FROM {1} ", string.Join(", ", selectSQL), string.Join(", ", TableList));
+        string query = string.Format("SELECT {0} \nFROM {1}\n", string.Join(", ", selectSQL), string.Join(", ", TableList));
 
 
         // nối chuỗi
         var where = "";
-        if (whereSQL.Count() > 0 && orSQL.Count() > 0)
+
+        if (criteriaSQL.Count() > 0 && orSQL.Count() > 0)
         {
-            where = string.Format("({0}) OR {1}", string.Join(" AND ", whereSQL), string.Join(" OR ", orSQL));
+            where = string.Format("({0}) OR {1}", string.Join(" AND ", criteriaSQL), string.Join(" OR ", orSQL));
         }
-        else if(whereSQL.Count() > 0 && orSQL.Count() == 0)
+        else if(criteriaSQL.Count() > 0 && orSQL.Count() == 0)
         {
-            where = string.Format("{0}", string.Join(" OR ", whereSQL));
+            where = string.Format("{0}", string.Join(" AND ", criteriaSQL));
         }
-        else if (whereSQL.Count() == 0 && orSQL.Count() > 0)
+        else if (criteriaSQL.Count() == 0 && orSQL.Count() > 0)
         {
-            where = string.Format("{0}", string.Join(", ", orSQL));
+            where = string.Format("{0}", string.Join(" OR ", orSQL));
         }
+
 
         if (joinSQL.Count() > 0 && !string.IsNullOrEmpty(where))
         {
-            sql += string.Format("WHERE ({0}) AND ({1}) ", string.Join(" AND ", joinSQL), where);
+            query += string.Format("WHERE ({0}) \n\t\t AND ({1}) \n", string.Join(" AND ", joinSQL), where);
         }
         else if (joinSQL.Count() > 0 && string.IsNullOrEmpty(where)) 
         {
-            sql += string.Format("WHERE ({0}) ", string.Join(" AND ", joinSQL));
+            query += string.Format("WHERE ({0}) \n", string.Join(" AND ", joinSQL));
         }
         else if (joinSQL.Count() == 0 && !string.IsNullOrEmpty(where))
         {
-            sql += string.Format("WHERE ({0}) ", where);
+            query += string.Format("WHERE ({0}) \n", where);
         }
 
 
@@ -333,19 +420,41 @@ public partial class _Default : System.Web.UI.Page {
 
         if (groupSQL.Count() > 0)
         {
-            sql += string.Format("GROUP BY {0} ", string.Join(", ", groupSQL));
+            query += string.Format("GROUP BY {0}\n", string.Join(", ", groupSQL));
         }
+
+        var having = "";
+
+        if (havingCriteriaSQL.Count() > 0 && havingOrSQL.Count() > 0)
+        {
+            having = string.Format("({0}) OR {1}", string.Join(" AND ", havingCriteriaSQL), string.Join(" OR ", havingOrSQL));
+        }
+        else if (havingCriteriaSQL.Count() > 0 && havingOrSQL.Count() == 0)
+        {
+            having = string.Format("{0}", string.Join(" AND ", havingCriteriaSQL));
+        }
+        else if (havingCriteriaSQL.Count() == 0 && havingOrSQL.Count() > 0)
+        {
+            having = string.Format("{0}", string.Join(" OR ", havingOrSQL));
+        }
+
+
+        if (!string.IsNullOrEmpty(having))
+        {
+            query += string.Format("HAVING {0}\n", having);
+        }
+
+
 
         if (sortSQL.Count() > 0)
         {
-            sql += string.Format("ORDER BY {0}", string.Join(", ", sortSQL));
+            query += string.Format("ORDER BY {0}\n", string.Join(", ", sortSQL));
         }
 
+        //Debug.WriteLine(query);
 
-        Debug.WriteLine(sql);
-
-        HttpContext.Current.Session["querySQL"] = sql;
-        return sql;
+        HttpContext.Current.Session["querySQL"] = query;
+        return query;
     }
 
     [System.Web.Services.WebMethod]

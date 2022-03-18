@@ -158,6 +158,50 @@ QBE.Tables = [];
 
 
 $(function () {
+
+    function genData(){
+        // Tạo lại data => json
+        var data = $("#genForm").serializeArray();
+        var result = {
+            object_ids: []
+        };
+        for (let i = 0; i < data.length; i++) {
+            var name = data[i].name;
+            var value = data[i].value;
+
+            if (!result[name]) {
+                result[name] = [];
+            }
+
+
+
+            var object_id = "";
+            if (data[i].value.includes("$$")) {
+                var array = data[i].value.split("$$");
+                object_id = array[0];
+                value = array[1];
+            }
+            if (name == "gen_Table") {
+                result["object_ids"].push(object_id);
+            }
+
+            result[name].push(value);
+
+
+        }
+        if (!result.gen_Show) result.gen_Show = [];
+        if (!result.gen_Total) result.gen_Total = [];
+
+        var noOfColumn = document.getElementById('dataTable').rows[0].cells.length - 1;
+        var genOr = [];
+        for (let i = 0; i < result.gen_Or.length; i += noOfColumn) {
+            genOr.push(result.gen_Or.slice(i, i + noOfColumn));
+        }
+        result.gen_Or = genOr;
+        result.TableList = QBE.Tables.map(item => item.name);
+        return result;
+    }
+
     function ajaxRequest(url, data, callback) {
         $.ajax({
             url: url,
@@ -314,63 +358,31 @@ $(function () {
     });
 
     // Sự kiện click nút tạo câu lệnh query SQL
-    $('body').on('click', '#genSQL', function () {
-
-        // Tạo lại data => json
-            var data = $("#genForm").serializeArray();
-            var result = {
-                object_ids: []
-            };
-            for (let i = 0; i < data.length; i++) {
-                var name = data[i].name;
-                var value = data[i].value;
-
-                if (!result[name]) {
-                    result[name] = [];
-                }
-
-            
-            
-                var object_id = "";
-                if (data[i].value.includes("$$")) {
-                    var array = data[i].value.split("$$");
-                    object_id = array[0];
-                    value = array[1];
-                }
-                if (name == "gen_Table") {
-                    result["object_ids"].push(object_id);
-                }
-
-                result[name].push(value);
-            
-            
-            }
-            if (!result.gen_Show) result.gen_Show = [];
-            if (!result.gen_Total) result.gen_Total = [];
-
-        var noOfColumn = document.getElementById('dataTable').rows[0].cells.length - 1;
-        var genOr = [];
-        for (let i = 0; i < result.gen_Or.length; i += noOfColumn) {
-            genOr.push(result.gen_Or.slice(i, i + noOfColumn));
-        }
-        result.gen_Or = genOr;
-        result.TableList = QBE.Tables.map(item => item.name);
+    $('body').on('change', '#genForm', function () {
         // thực hiện request lên server để gen câu lệnh sql
-        
-        $("#genForm").find(".card").addClass("loading");
+        var result = genData();
+        var $errorElm = $("#error");
         ajaxRequest('Default.aspx/genSQL', result, function (resp) {
+            var errorMsg = "";
             if (resp.d) {
                 if (resp.d.includes("ERROR|")) {
-                    Swal.fire("Lỗi!", resp.d.replace("ERROR|", ""), 'error');
+                    errorMsg = resp.d.replace("ERROR|", "");
                 } else {
+                    errorMsg = "";
                     $("#querySQL").val(resp.d);
-                    $("#sql-panel-tab").tab("show");
                 }
             }
             else {
-                Swal.fire("Thất bại!", "Lỗi hệ thống! Hãy thử lại!", 'error');
+                errorMsg =  "Lỗi hệ thống! Hãy thử lại!";
             }
-            $("#genForm").find(".card").removeClass("loading");
+
+            if (errorMsg == "" && !$errorElm.hasClass("d-none")) {
+                $errorElm.addClass("d-none");
+            } else if (errorMsg != "" && $errorElm.hasClass("d-none")) {
+                $errorElm.removeClass("d-none");
+            }
+            $errorElm.html(errorMsg);
+
         });
     });
 
@@ -409,6 +421,8 @@ $(function () {
             $("#tr_Total").addClass("d-none");
             $(".gen_Total").prop("disabled", true);
         }
+
+        $("#genForm").trigger("change");
         
     });
 

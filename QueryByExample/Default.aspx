@@ -42,6 +42,11 @@
                                                   <textarea class="form-control" id="querySQL" name="query" rows="7"></textarea>
                                                 </div>
                                                 <div class="mb-3">
+                                                    <div class="alert alert-danger d-none" role="alert" id="error">
+                                                      
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
                                                   <button type="button" class="btn btn-primary btn-icon-split"  id="genReport">
                                                       <span class="icon text-white-50">
                                                             <i class="fas fa-flag"></i>
@@ -70,12 +75,6 @@
                                          
                                         <div class="row">
                                             <div class="col col-lg-7">
-                                                <button type="button" class="btn btn-success mb-3 mr-3 btn-icon-split" id="genSQL">
-                                                     <span class="icon text-white-50">
-                                                        <i class="fas fa-table"></i>
-                                                    </span>
-                                                    <span class="text">Tạo query SQL</span>
-                                                 </button>
                                                  <button type="button" class="btn btn-primary mb-3 mr-3 btn-icon-split" id="sumSQL">
                                                      <span class="icon text-white-50">
                                                         <i class="fas fa-sigma"></i>
@@ -164,6 +163,7 @@
                                                     <% else if (col == "Total"){ %>
                                                     <select class="form-select form-select-sm gen_<%= col %>" name="gen_<%= col %>" disabled>
                                                        <option value="group_by">Group By</option>
+                                                       <option value="where">Where</option>
                                                        <option value="count">Count</option>
                                                        <option value="sum">Sum</option>
                                                        <option value="min">Min</option>
