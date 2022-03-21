@@ -1,4 +1,4 @@
-﻿var colors = ["black", "silver", "gray", "white", "maroon", "red", "purple", "fuchsia", "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua",  "antiquewhite", "aquamarine", "beige", "bisque", "blanchedalmond", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse", "chocolate", "coral", "cornflowerblue", "crimson", "cyan", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon", "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise", "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick", "forestgreen",  "gold", "goldenrod", "greenyellow", "grey", "hotpink", "indianred", "indigo", "khaki", "lawngreen", "lemonchiffon",  "limegreen", "linen", "magenta", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple", "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise", "mediumvioletred", "midnightblue", "mistyrose", "moccasin", "navajowhite", "olivedrab", "orangered", "orchid", "palegoldenrod", "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru", "pink", "plum", "powderblue", "rosybrown", "royalblue", "saddlebrown", "salmon", "sandybrown", "seagreen", "sienna", "skyblue", "slateblue", "slategray", "slategrey", "steelblue", "tan", "thistle", "tomato", "turquoise", "violet", "wheat", "yellowgreen", "rebeccapurple"];
+﻿var colors = ["black", "silver", "gray", "white", "maroon", "red", "purple", "fuchsia", "green", "lime", "olive", "yellow", "navy", "blue", "teal", "aqua",  "antiquewhite", "aquamarine", "beige", "blanchedalmond", "blueviolet", "brown", "burlywood", "cadetblue", "chartreuse", "chocolate", "coral", "cornflowerblue", "crimson", "cyan", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon", "darkseagreen", "darkslateblue", "darkslategray", "darkslategrey", "darkturquoise", "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick", "forestgreen",  "gold", "goldenrod", "greenyellow", "grey", "hotpink", "indianred", "indigo", "khaki", "lawngreen", "lemonchiffon",  "limegreen", "linen", "magenta", "mediumaquamarine", "mediumblue", "mediumorchid", "mediumpurple", "mediumseagreen", "mediumslateblue", "mediumspringgreen", "mediumturquoise", "mediumvioletred", "midnightblue", "mistyrose", "moccasin", "navajowhite", "olivedrab", "orangered", "orchid", "palegoldenrod", "palegreen", "paleturquoise", "palevioletred", "papayawhip", "peachpuff", "peru", "pink", "plum", "powderblue", "rosybrown", "royalblue", "saddlebrown", "salmon", "sandybrown", "seagreen", "sienna", "skyblue", "slateblue", "slategray", "slategrey", "steelblue", "tan", "thistle", "tomato", "turquoise", "violet", "wheat", "yellowgreen", "rebeccapurple"];
 var operators = [">=", "<=", ">", "<", "="];
 
 function isNumeric(str) {
@@ -54,6 +54,7 @@ function draw() {
     for (var table of QBE.ForeignKeys) {
         for (var item of table.data) {
             ForeignKeys.push(item);
+            break;
         }
     }
 
@@ -226,6 +227,7 @@ $(function () {
                     item.color = colors[Math.floor(Math.random() * colors.length)];
                     return item;
                 });
+
                 QBE.ForeignKeys.push({
                     object_id: object_id,
                     data: data
@@ -293,40 +295,44 @@ $(function () {
         }
 
         // Thực hiện requset lên server lấy danh sách các cột của 1 bảng nào đó theo object_id
-        ajaxRequest('Default.aspx/getColumns', { object_id: object_id }, function (resp) {
-            draggable.draggable("destroy");
+        ajaxRequest('Default.aspx/getColumns', { object_id: object_id }, function (respGetColumns) {
+            ajaxRequest('Default.aspx/getPrimaryKey', { object_id: object_id }, function (respGetPrimaryKey) {
+                draggable.draggable("destroy");
 
-            // vẽ lại nó trên bảng relationship
-            var html = "<table class=\"draggable shadow table-sql context-menu\" data-name=\""+name+"\" data-id=\"" + object_id + "\" id=\"table_" + object_id + "\">" +
-                "<thead>" +
-                "<tr>" +
-                "<th scope=\"col\">" + name + "</th>" +
-                "</tr>" +
-                "</thead>" +
-                "<tbody>";
-            html += "<tr data-column=\"" + name + ".*\" data-id=\"*\"><th scope=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*</th></tr>";
-            var dataColumn = JSON.parse(resp.d);
+                // vẽ lại nó trên bảng relationship
+                var html = "<table class=\"draggable shadow table-sql context-menu\" data-name=\"" + name + "\" data-id=\"" + object_id + "\" id=\"table_" + object_id + "\">" +
+                    "<thead>" +
+                    "<tr>" +
+                    "<th scope=\"col\">" + name + "</th>" +
+                    "</tr>" +
+                    "</thead>" +
+                    "<tbody>";
+                html += "<tr data-column=\"" + name + ".*\" data-id=\"*\"><th scope=\"row\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*</th></tr>";
+                var dataColumn = JSON.parse(respGetColumns.d);
 
-            var dataTable = {
-                name: name,
-                object_id: object_id,
-                columns: dataColumn
-            };
-            QBE.Tables.push(dataTable);
+                var dataTable = {
+                    name: name,
+                    object_id: object_id,
+                    columns: dataColumn
+                };
+                QBE.Tables.push(dataTable);
 
-            for (let i = 0; i < dataColumn.length; i++) {
-                var type = dataColumn[i].CHARACTER_MAXIMUM_LENGTH != null ? "(" + dataColumn[i].CHARACTER_MAXIMUM_LENGTH + ")" : "";
-                var pk = dataColumn[i].is_primary_key ? "<img src=\"Content/images/b_primary.png\"/>&nbsp;" : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                html += "<tr data-column=\"" + name + "." + dataColumn[i].name + "\" data-id=\"" + dataColumn[i].name + "\"><th scope=\"row\">" + pk + dataColumn[i].name + ": " + dataColumn[i].DATA_TYPE + type + "</th></tr>";
-            }
+                var dataPrimaryKey = JSON.parse(respGetPrimaryKey.d).map(item => item.name);
 
-            html += "</tbody></table>";
+                for (let i = 0; i < dataColumn.length; i++) {
+                    var type = dataColumn[i].CHARACTER_MAXIMUM_LENGTH != null ? "(" + dataColumn[i].CHARACTER_MAXIMUM_LENGTH + ")" : "";
+                    var pk = dataPrimaryKey.includes(dataColumn[i].name) ? "<img src=\"Content/images/b_primary.png\"/>&nbsp;" : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                    html += "<tr data-column=\"" + name + "." + dataColumn[i].name + "\" data-id=\"" + dataColumn[i].name + "\"><th scope=\"row\">" + pk + dataColumn[i].name + ": " + dataColumn[i].DATA_TYPE + type + "</th></tr>";
+                }
 
-            $("#listTable").append(html);
-            $(".draggable").draggable(options);
-            $("a[id=a_" + object_id + "]").parents().addClass("active");
-            getForeignKey(object_id);
-            addOptionGenTable(dataTable);
+                html += "</tbody></table>";
+
+                $("#listTable").append(html);
+                $(".draggable").draggable(options);
+                $("a[id=a_" + object_id + "]").parents().addClass("active");
+                getForeignKey(object_id);
+                addOptionGenTable(dataTable);
+            });
         });
     });
 

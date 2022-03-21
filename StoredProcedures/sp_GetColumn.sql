@@ -15,21 +15,13 @@ CREATE OR ALTER   PROCEDURE [dbo].[sp_GetColumn]
 	@OBJECT_ID int
 AS
 BEGIN
-	DECLARE @primary_key nvarchar(10);
-	SELECT @primary_key = c.name
-		FROM QLDSV_TC.sys.indexes i
-			inner join QLDSV_TC.sys.index_columns ic ON i.object_id = ic.object_id AND i.index_id = ic.index_id
-			inner join QLDSV_TC.sys.columns c ON ic.object_id = c.object_id AND c.column_id = ic.column_id
-		WHERE i.is_primary_key = 1
-		AND i.object_ID = @OBJECT_ID
-
-
-	SELECT a.name, b.DATA_TYPE, b.CHARACTER_MAXIMUM_LENGTH, IIF(@primary_key = a.name, 1, 0 ) as is_primary_key
+	SELECT a.name, b.DATA_TYPE, b.CHARACTER_MAXIMUM_LENGTH
 	FROM 
 		QLDSV_TC.sys.columns a
 	JOIN QLDSV_TC.INFORMATION_SCHEMA.COLUMNS b
 	ON a.name = b.COLUMN_NAME AND b.TABLE_NAME = OBJECT_NAME(@OBJECT_ID)
 	WHERE a.object_id = @OBJECT_ID AND a.is_rowguidcol = 0 
-	GROUP BY a.name, b.DATA_TYPE, b.CHARACTER_MAXIMUM_LENGTH
+	GROUP BY a.name, b.DATA_TYPE, b.CHARACTER_MAXIMUM_LENGTH, a.column_id
+	ORDER BY a.column_id
 
 END

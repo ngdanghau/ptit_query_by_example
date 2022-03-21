@@ -41,6 +41,15 @@ public partial class _Default : System.Web.UI.Page {
                 string JSONresult = JsonConvert.SerializeObject(dt);
                 return JSONresult;
         }
+    
+        [System.Web.Services.WebMethod]
+        [ScriptMethod(UseHttpGet = false)]
+        public static string getPrimaryKey(int object_id)
+        {
+                DataTable dt = getInfoPrimaryKey(object_id);
+                string JSONresult = JsonConvert.SerializeObject(dt);
+                return JSONresult;
+        }
 
         private static DataTable getInfoForeignKey(int object_id)
         {
@@ -51,6 +60,12 @@ public partial class _Default : System.Web.UI.Page {
         private static DataTable getInfoForeignKey(string table_name)
         {
             string lenh = string.Format("EXEC sp_GetForeignKeyByTableName @TABLE_NAME = N'{0}'", table_name);
+            return DB.ExecSqlDataTable(lenh);
+        }
+    
+        private static DataTable getInfoPrimaryKey(int object_id)
+        {
+            string lenh = string.Format("EXEC sp_GetPrimaryKey @OBJECT_ID = {0}", object_id);
             return DB.ExecSqlDataTable(lenh);
         }
 
