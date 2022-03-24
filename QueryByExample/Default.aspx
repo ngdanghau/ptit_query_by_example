@@ -81,7 +81,7 @@
                                                     </span>
                                                     <span class="text">Thêm hàm thống kê SQL</span>
                                                  </button>
-                                                 <button type="reset" class="btn btn-warning mb-3 mr-3 btn-icon-split" id="resetSQL">
+                                                 <button type="button" class="btn btn-warning mb-3 mr-3 btn-icon-split" id="resetSQL">
                                                      <span class="icon text-white-50">
                                                         <i class="fas fa-repeat-1"></i>
                                                     </span>

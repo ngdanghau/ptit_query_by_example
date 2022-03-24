@@ -434,21 +434,53 @@ $(function () {
 
     // sự kiện click nút reset tất cả
     $('body').on('click', '#resetAllSQL', function () {
-        $("#genForm").trigger("reset");
-        $("#reportForm").trigger("reset");
-        $(".gen_Field option").each(function (index) {
-            if ($(this).val() != "") {
-                $(this).remove();
+        Swal.fire({
+            title: 'Hãy chắc chắn thao tác này!',
+            icon: 'warning',
+            showCancelButton: true,
+            focusConfirm: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $("#genForm").trigger("reset");
+                $("#reportForm").trigger("reset");
+                $(".gen_Field option").each(function (index) {
+                    if ($(this).val() != "") {
+                        $(this).remove();
+                    }
+                });
+
+                $(".item_table.active").each(function (index) {
+                    $(this).find("a").click();
+                });
+
+                Swal.fire('Đã reset!', '', 'success')
             }
-        });
+           
 
-        $(".item_table.active").each(function (index) {
-            $(this).find("a").click();
-        });
+        })
 
+       
     });
 
 
+    // sự kiện click nút reset bảng chọn
+    $('body').on('click', '#resetSQL', function () {
+        Swal.fire({
+            title: 'Hãy chắc chắn thao tác này!',
+            icon: 'warning',
+            showCancelButton: true,
+            focusConfirm: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $("#genForm").trigger("reset");
+                Swal.fire('Đã reset!', '', 'success')
+            }
+
+
+        })
+
+
+    });
     // sự kiện click nút thêm 1 hàng
     $('body').on('click', '#addOneRow', function () {
         var noOfColumn = document.getElementById('dataTable').rows[0].cells.length - 1;
