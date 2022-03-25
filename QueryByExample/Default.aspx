@@ -39,7 +39,7 @@
                                                 </div>
                                                 <div class="mb-3">
                                                   <label for="querySQL" class="form-label">Query SQL</label>
-                                                  <textarea class="form-control" id="querySQL" name="query" rows="7"></textarea>
+                                                  <textarea class="form-control" id="querySQL" name="query" rows="10"></textarea>
                                                 </div>
                                                 <div class="mb-3">
                                                     <div class="alert alert-danger d-none" role="alert" id="error">

@@ -99,7 +99,22 @@ public partial class _Default : System.Web.UI.Page {
         List<string> TableList, List<List<string>> gen_Or
     )
     {
-    
+
+        /**
+         * SELECT $selectSQL 
+         * FROM $TableList 
+         * WHERE ($joinSQL) 
+         *      AND (  
+         *              ($criteriaSQL)   OR  
+         *              ($orSQL) 
+         *         )
+         * GROUP BY $groupSQL
+         * HAVING (  
+         *              ($havingCriteriaSQL)   OR  
+         *              ($havingOrSQL) 
+         *         )
+         * SORT BY $sortSQL ASC|DESC
+         */
         var selectSQL = new List<string>();
         var orSQL = new List<string>();
         var criteriaSQL = new List<string>();
@@ -360,7 +375,7 @@ public partial class _Default : System.Web.UI.Page {
             if (or_condition.Count() > 0)
             {
                 orSQL.Add(
-                    string.Format("({0})", string.Join(" AND ", or_condition))
+                    string.Format("(\n\t\t\t\t\t{0}\n\t\t\t\t)", string.Join(" AND ", or_condition))
                 );
             } 
             
@@ -407,7 +422,7 @@ public partial class _Default : System.Web.UI.Page {
 
         if (criteriaSQL.Count() > 0 && orSQL.Count() > 0)
         {
-            where = string.Format("({0}) OR {1}", string.Join(" AND ", criteriaSQL), string.Join(" OR ", orSQL));
+            where = string.Format("(\n\t\t\t\t\t{0}\n\t\t\t\t) \n\t\t\t\tOR \n\t\t\t\t{1}", string.Join(" AND ", criteriaSQL), string.Join(" OR ", orSQL));
         }
         else if(criteriaSQL.Count() > 0 && orSQL.Count() == 0)
         {
@@ -421,7 +436,7 @@ public partial class _Default : System.Web.UI.Page {
 
         if (joinSQL.Count() > 0 && !string.IsNullOrEmpty(where))
         {
-            query += string.Format("WHERE ({0}) \n\t\t AND ({1}) \n", string.Join(" AND ", joinSQL), where);
+            query += string.Format("WHERE ({0}) \n\t\t AND \n\t\t(\n\t\t\t\t{1}\n\t\t) \n", string.Join(" AND ", joinSQL), where);
         }
         else if (joinSQL.Count() > 0 && string.IsNullOrEmpty(where)) 
         {
@@ -444,7 +459,7 @@ public partial class _Default : System.Web.UI.Page {
 
         if (havingCriteriaSQL.Count() > 0 && havingOrSQL.Count() > 0)
         {
-            having = string.Format("({0}) OR {1}", string.Join(" AND ", havingCriteriaSQL), string.Join(" OR ", havingOrSQL));
+            having = string.Format("(\n\t\t\t{0}\n\t\t) \n\t\t OR \n\t\t(\n\t\t\t{1}\n\t\t) \n", string.Join(" AND ", havingCriteriaSQL), string.Join(" OR ", havingOrSQL));
         }
         else if (havingCriteriaSQL.Count() > 0 && havingOrSQL.Count() == 0)
         {
