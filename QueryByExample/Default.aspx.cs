@@ -90,6 +90,7 @@ public partial class _Default : System.Web.UI.Page {
 
     [System.Web.Services.WebMethod]
     [ScriptMethod(UseHttpGet = false)]
+    
     public static string genSQL(
         List<string> gen_Table, List<string> gen_Field, 
         List<string> gen_Sort, List<string> gen_Criteria, 
@@ -98,6 +99,7 @@ public partial class _Default : System.Web.UI.Page {
         List<string> TableList, List<List<string>> gen_Or
     )
     {
+    
         var selectSQL = new List<string>();
         var orSQL = new List<string>();
         var criteriaSQL = new List<string>();
