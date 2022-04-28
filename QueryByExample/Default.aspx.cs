@@ -264,11 +264,11 @@ public partial class _Default : System.Web.UI.Page {
 
                     if (isTotal)
                     {
-                        if (total == "where")
+                        if (total == "where" || total == "group_by")
                         {
                             sortSQL.Add(table_field + " " + sort_value);
                         }
-                        else if(total != "group_by")
+                        else
                         {
                             sortSQL.Add(string.Format("{0}({1}) {2}", total.ToUpper(), table_field, sort_value));
                         } 
@@ -282,7 +282,7 @@ public partial class _Default : System.Web.UI.Page {
             }
 
 
-            if (isShow && isTotal && (total == "group_by" || total == "where"))
+            if (isShow && isTotal && total == "group_by")
             {
                 groupSQL.Add(table_field);
             }

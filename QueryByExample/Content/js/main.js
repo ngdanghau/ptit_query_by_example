@@ -364,7 +364,7 @@ $(function () {
     });
 
     // Sự kiện click nút tạo câu lệnh query SQL
-    $('body').on('change', '#genForm', function () {
+    $('body').on('keyup change', '#genForm', function () {
         // thực hiện request lên server để gen câu lệnh sql
         var result = genData();
         var $errorElm = $("#error");
