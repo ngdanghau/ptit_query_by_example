@@ -53,7 +53,9 @@ function draw() {
     var ForeignKeys = [];
     for (var table of QBE.ForeignKeys) {
         for (var item of table.data) {
-            ForeignKeys.push(item);
+            if (!ForeignKeys.some(data => data.FK_NAME == item.FK_NAME)) {
+                ForeignKeys.push(item);
+            }
         }
     }
 

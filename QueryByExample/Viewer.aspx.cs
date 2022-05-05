@@ -1,9 +1,6 @@
-﻿using DevExpress.XtraReports.Web;
-using Resources;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -20,8 +17,7 @@ public partial class Viewer : System.Web.UI.Page
 
             DataTable dt = DB.ExecSqlDataTable(sql);
 
-            var cachedReportSource = new CachedReportSourceWeb(new XtraReport1(title, dt));
-            documentViewer.OpenReport(cachedReportSource);
+            ASPxDocumentViewer1.Report = new XtraReport1(title, dt);
         }
         else
         {

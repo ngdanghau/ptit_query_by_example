@@ -3,26 +3,25 @@ using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using DevExpress.XtraReports.UI;
-using System.Data;
+using System.Collections.Generic;
 using DevExpress.Utils;
 using DevExpress.XtraPrinting;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System.Data;
 
 /// <summary>
 /// Summary description for XtraReport1
 /// </summary>
 public class XtraReport1 : DevExpress.XtraReports.UI.XtraReport
 {
-    private TopMarginBand TopMargin;
-    private BottomMarginBand BottomMargin;
-    private DetailBand Detail;
+    private DevExpress.XtraReports.UI.DetailBand Detail;
+    private DevExpress.XtraReports.UI.TopMarginBand TopMargin;
+    private DevExpress.XtraReports.UI.BottomMarginBand BottomMargin;
+
     private XRLabel xrLabel1;
     private ReportHeaderBand ReportHeader;
     private GroupHeaderBand GroupHeader1;
     private XRTable table1;
     private XRTable table2;
-
     /// <summary>
     /// Required designer variable.
     /// </summary>
@@ -102,10 +101,9 @@ public class XtraReport1 : DevExpress.XtraReports.UI.XtraReport
 
         return tableRow;
     }
-
     public XtraReport1(string title, DataTable dt)
-	{
-		InitializeComponent();
+    {
+        InitializeComponent();
         //
         // TODO: Add constructor logic here
         //
@@ -156,101 +154,112 @@ public class XtraReport1 : DevExpress.XtraReports.UI.XtraReport
     /// Clean up any resources being used.
     /// </summary>
     /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-    protected override void Dispose(bool disposing) {
-		if (disposing && (components != null)) {
-			components.Dispose();
-		}
-		base.Dispose(disposing);
-	}
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing && (components != null))
+        {
+            components.Dispose();
+        }
+        base.Dispose(disposing);
+    }
 
-	#region Designer generated code
+    #region Designer generated code
 
-	/// <summary>
-	/// Required method for Designer support - do not modify
-	/// the contents of this method with the code editor.
-	/// </summary>
-	private void InitializeComponent() {
-            string resourceFileName = "XtraReport1.resx";
-            this.TopMargin = new DevExpress.XtraReports.UI.TopMarginBand();
-            this.BottomMargin = new DevExpress.XtraReports.UI.BottomMarginBand();
-            this.Detail = new DevExpress.XtraReports.UI.DetailBand();
-            this.xrLabel1 = new DevExpress.XtraReports.UI.XRLabel();
-            this.ReportHeader = new DevExpress.XtraReports.UI.ReportHeaderBand();
-            this.GroupHeader1 = new DevExpress.XtraReports.UI.GroupHeaderBand();
-            this.table1 = new DevExpress.XtraReports.UI.XRTable();
-            this.table2 = new DevExpress.XtraReports.UI.XRTable();
-            ((System.ComponentModel.ISupportInitialize)(this.table1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.table2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this)).BeginInit();
-            // 
-            // TopMargin
-            // 
-            this.TopMargin.Name = "TopMargin";
-            // 
-            // BottomMargin
-            // 
-            this.BottomMargin.Name = "BottomMargin";
-            // 
-            // Detail
-            // 
-            this.Detail.HeightF = 25F;
-            this.Detail.Name = "Detail";
-            // 
-            // xrLabel1
-            // 
-            this.xrLabel1.Font = new System.Drawing.Font("Arial", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.xrLabel1.LocationFloat = new DevExpress.Utils.PointFloat(24.58333F, 9.999993F);
-            this.xrLabel1.Multiline = true;
-            this.xrLabel1.Name = "xrLabel1";
-            this.xrLabel1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
-            this.xrLabel1.SizeF = new System.Drawing.SizeF(600.709F, 24.42544F);
-            this.xrLabel1.StylePriority.UseFont = false;
-            this.xrLabel1.StylePriority.UseTextAlignment = false;
-            this.xrLabel1.Text = "xrLabel1";
-            this.xrLabel1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
-            // 
-            // ReportHeader
-            // 
-            this.ReportHeader.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
+    /// <summary>
+    /// Required method for Designer support - do not modify
+    /// the contents of this method with the code editor.
+    /// </summary>
+    private void InitializeComponent()
+    {
+        components = new System.ComponentModel.Container();
+        this.Detail = new DevExpress.XtraReports.UI.DetailBand();
+        this.TopMargin = new DevExpress.XtraReports.UI.TopMarginBand();
+        this.BottomMargin = new DevExpress.XtraReports.UI.BottomMarginBand();
+        this.xrLabel1 = new DevExpress.XtraReports.UI.XRLabel();
+        this.ReportHeader = new DevExpress.XtraReports.UI.ReportHeaderBand();
+        this.GroupHeader1 = new DevExpress.XtraReports.UI.GroupHeaderBand();
+        this.table1 = new DevExpress.XtraReports.UI.XRTable();
+        this.table2 = new DevExpress.XtraReports.UI.XRTable();
+        ((System.ComponentModel.ISupportInitialize)(this.table1)).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)(this.table2)).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)(this)).BeginInit();
+        this.BottomMargin.Height = 100;
+        this.TopMargin.Height = 100;
+        this.Bands.AddRange(new DevExpress.XtraReports.UI.Band[] {
+        this.Detail,
+        this.TopMargin,
+        this.BottomMargin});
+        ((System.ComponentModel.ISupportInitialize)(this)).EndInit();
+
+        // 
+        // TopMargin
+        // 
+        this.TopMargin.Name = "TopMargin";
+        // 
+        // BottomMargin
+        // 
+        this.BottomMargin.Name = "BottomMargin";
+        // 
+        // Detail
+        // 
+        this.Detail.HeightF = 25F;
+        this.Detail.Name = "Detail";
+        // 
+        // xrLabel1
+        // 
+        this.xrLabel1.Font = new System.Drawing.Font("Arial", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+        this.xrLabel1.LocationFloat = new DevExpress.Utils.PointFloat(24.58333F, 9.999993F);
+        this.xrLabel1.Multiline = true;
+        this.xrLabel1.Name = "xrLabel1";
+        this.xrLabel1.Padding = new DevExpress.XtraPrinting.PaddingInfo(2, 2, 0, 0, 100F);
+        this.xrLabel1.SizeF = new System.Drawing.SizeF(600.709F, 24.42544F);
+        this.xrLabel1.StylePriority.UseFont = false;
+        this.xrLabel1.StylePriority.UseTextAlignment = false;
+        this.xrLabel1.Text = "xrLabel1";
+        this.xrLabel1.TextAlignment = DevExpress.XtraPrinting.TextAlignment.TopCenter;
+        // 
+        // ReportHeader
+        // 
+        this.ReportHeader.Controls.AddRange(new DevExpress.XtraReports.UI.XRControl[] {
             this.xrLabel1});
-            this.ReportHeader.HeightF = 56.79823F;
-            this.ReportHeader.Name = "ReportHeader";
-            // 
-            // GroupHeader1
-            // 
-            this.GroupHeader1.GroupUnion = DevExpress.XtraReports.UI.GroupUnion.WithFirstDetail;
-            this.GroupHeader1.HeightF = 28F;
-            this.GroupHeader1.Name = "GroupHeader1";
-            // 
-            // XtraReport1
-            // 
-            this.Bands.AddRange(new DevExpress.XtraReports.UI.Band[] {
+        this.ReportHeader.HeightF = 56.79823F;
+        this.ReportHeader.Name = "ReportHeader";
+        // 
+        // GroupHeader1
+        // 
+        this.GroupHeader1.GroupUnion = DevExpress.XtraReports.UI.GroupUnion.WithFirstDetail;
+        this.GroupHeader1.HeightF = 28F;
+        this.GroupHeader1.Name = "GroupHeader1";
+        // 
+        // XtraReport1
+        // 
+        this.Bands.AddRange(new DevExpress.XtraReports.UI.Band[] {
             this.TopMargin,
             this.BottomMargin,
             this.Detail,
             this.ReportHeader,
             this.GroupHeader1});
 
-            this.Font = new System.Drawing.Font("Arial", 9.75F);
-            this.Version = "19.2";
-            ((System.ComponentModel.ISupportInitialize)(this.table1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.table2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this)).EndInit();
+        this.Font = new System.Drawing.Font("Arial", 9.75F);
+        this.Version = "19.2";
+        ((System.ComponentModel.ISupportInitialize)(this.table1)).EndInit();
+        ((System.ComponentModel.ISupportInitialize)(this.table2)).EndInit();
+        ((System.ComponentModel.ISupportInitialize)(this)).EndInit();
 
 
-            // 
-            // table1
-            // 
-            this.table1.LocationFloat = new DevExpress.Utils.PointFloat(0F, 0F);
-            this.table1.Name = "table1";
-            this.table1.SizeF = new System.Drawing.SizeF(650F, 28F);
-            // 
-            // table2
-            // 
-            this.table2.LocationFloat = new DevExpress.Utils.PointFloat(0F, 0F);
-            this.table2.Name = "table2";
-            this.table2.SizeF = new System.Drawing.SizeF(650F, 25F);
+        // 
+        // table1
+        // 
+        this.table1.LocationFloat = new DevExpress.Utils.PointFloat(0F, 0F);
+        this.table1.Name = "table1";
+        this.table1.SizeF = new System.Drawing.SizeF(650F, 28F);
+        // 
+        // table2
+        // 
+        this.table2.LocationFloat = new DevExpress.Utils.PointFloat(0F, 0F);
+        this.table2.Name = "table2";
+        this.table2.SizeF = new System.Drawing.SizeF(650F, 25F);
     }
 
-	#endregion
+    #endregion
 }
