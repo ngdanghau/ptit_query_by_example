@@ -54,7 +54,6 @@ function draw() {
     for (var table of QBE.ForeignKeys) {
         for (var item of table.data) {
             ForeignKeys.push(item);
-            break;
         }
     }
 
