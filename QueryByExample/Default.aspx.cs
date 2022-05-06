@@ -298,6 +298,10 @@ public partial class _Default : System.Web.UI.Page {
             var or_having_condition = new List<string>();
             for (var i = 0; i < gen_Table.Count(); i++)
             {
+                if (!Utils.inBounds(i, gen_Field))
+                {
+                    continue;
+                }
                 var field = gen_Field[i].Trim();
                 var table = gen_Table[i].Trim();
                 var table_field = table + "." + field;

@@ -442,6 +442,9 @@ $(function () {
             focusConfirm: false
         }).then((result) => {
             if (result.isConfirmed) {
+                QBE.ForeignKeys = [];
+                QBE.Tables = [];
+
                 $("#genForm").trigger("reset");
                 $("#reportForm").trigger("reset");
                 $(".gen_Field option").each(function (index) {
